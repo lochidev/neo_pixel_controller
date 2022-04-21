@@ -34,18 +34,18 @@ static inline void do_random(const size_t rounds, const size_t del)
   }
 }
 static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                            const bool forwardDir = true)
+                            const size_t pulse, const bool forwardDir = true)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
     if (forwardDir)
     {
-      for (size_t j = 0; j < NUM_LEDS + 4; j++)
+      for (size_t j = 0; j < NUM_LEDS + pulse; j++)
       {
         leds[j].setColorCode(color);
-        if (j > 3)
+        if (j > (pulse - 1))
         {
-          leds[j - 4].fadeLightBy(90);
+          leds[j - pulse].fadeLightBy(150);
         }
         FastLED.show();
         delay(del);
@@ -53,12 +53,12 @@ static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLCol
     }
     else
     {
-      for (size_t j = NUM_LEDS; j > -4; j--)
+      for (size_t j = NUM_LEDS; j > -pulse; j--)
       {
         leds[j].setColorCode(color);
-        if (j < 57)
+        if (j < (NUM_LEDS - (pulse - 1)))
         {
-          leds[j + 4].fadeLightBy(90);
+          leds[j + pulse].fadeLightBy(90);
         }
         FastLED.show();
         delay(del);
@@ -75,13 +75,13 @@ void loop()
     do_random(60, 100);
     break;
   case 2:
-    do_flame(60, 20, CRGB::Red, rand & 0b1);
+    do_flame(30, 20, CRGB::Red, 6, rand & 0b1);
     break;
   case 3:
-    do_flame(60, 20, CRGB::Blue, rand & 0b1);
+    do_flame(30, 20, CRGB::Blue, 6, rand & 0b1);
     break;
   case 4:
-    do_flame(60, 20, CRGB::Green, rand & 0b1);
+    do_flame(30, 20, CRGB::Green, 6, rand & 0b1);
     break;
   }
 }
