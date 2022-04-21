@@ -68,20 +68,20 @@ static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLCol
 }
 void loop()
 {
-  uint8_t rand = random8() & 0b111;
+  uint8_t rand = random8(1, 4);
   switch (rand)
   {
   case 1:
     do_random(60, 100);
     break;
   case 2:
-    do_flame(30, 20, CRGB::Red, 6, rand & 0b1);
+    do_flame(30, 20, CRGB::Red, 6, random8());
     break;
   case 3:
-    do_flame(30, 20, CRGB::Blue, 6, rand & 0b1);
+    do_flame(30, 20, CRGB::Blue, 6, random8());
     break;
   case 4:
-    do_flame(30, 20, CRGB::Green, 6, rand & 0b1);
+    do_flame(30, 20, CRGB::Green, 6, random8());
     break;
   }
 }
