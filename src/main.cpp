@@ -53,7 +53,7 @@ static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLCol
     }
     else
     {
-      for (size_t j = NUM_LEDS + 4; j > 0; j--)
+      for (size_t j = NUM_LEDS; j > -4; j--)
       {
         leds[j].setColorCode(color);
         if (j < 57)
