@@ -1,27 +1,17 @@
 #include <Arduino.h>
 #include "FastLED.h"
-#include <random>
 
-#define NUM_LEDS 60
+#define NUM_LEDS 55
 #define CHIPSET WS2812B
 #define COLOR_ORDER GRB
-#define DATA_PIN 2
+#define DATA_PIN 27
 #define VOLTS 5
 #define MAX_MA 500
-#define BRIGHTNESS 100
+#define BRIGHTNESS 200
 
 CRGB leds[NUM_LEDS];
 
-void setup()
-{
-  FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-  FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_MA);
-  FastLED.setBrightness(BRIGHTNESS);
-  FastLED.clear();
-  FastLED.show();
-  pinMode(DATA_PIN, OUTPUT);
-}
-static inline void do_random(const size_t rounds, const size_t del)
+static void do_random(const size_t rounds, const size_t del)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -33,8 +23,8 @@ static inline void do_random(const size_t rounds, const size_t del)
     delay(del);
   }
 }
-static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                            const size_t pulse, const bool forwardDir = true)
+static void do_flame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
+                     const int pulse, const uint8_t forwardDir = 1)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -42,7 +32,10 @@ static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLCol
     {
       for (size_t j = 0; j < NUM_LEDS + pulse; j++)
       {
-        leds[j].setColorCode(color);
+        if (j < NUM_LEDS)
+        {
+          leds[j].setColorCode(color);
+        }
         if (j > (pulse - 1))
         {
           leds[j - pulse].fadeLightBy(150);
@@ -53,12 +46,15 @@ static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLCol
     }
     else
     {
-      for (size_t j = NUM_LEDS; j > -pulse; j--)
+      for (int j = NUM_LEDS; j > -(pulse + 1); j--)
       {
-        leds[j].setColorCode(color);
+        if (j >= 0)
+        {
+          leds[j].setColorCode(color);
+        }
         if (j < (NUM_LEDS - (pulse - 1)))
         {
-          leds[j + pulse].fadeLightBy(90);
+          leds[j + pulse].fadeLightBy(150);
         }
         FastLED.show();
         delay(del);
@@ -66,22 +62,48 @@ static inline void do_flame(const size_t rounds, const size_t del, CRGB::HTMLCol
     }
   }
 }
+void setup()
+{
+  FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_MA);
+  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.clear();
+  FastLED.show();
+  pinMode(DATA_PIN, OUTPUT);
+  Serial.begin(115200);
+}
+
 void loop()
 {
-  uint8_t rand = random8(1, 4);
+  uint8_t rand = random8(1, 9);
+  Serial.println(rand);
+  CRGB::HTMLColorCode colorCode;
   switch (rand)
   {
   case 1:
-    do_random(60, 100);
-    break;
+    do_random(30, 100);
+    return;
   case 2:
-    do_flame(30, 20, CRGB::Red, 6, random8());
+    colorCode = CRGB::Red;
     break;
   case 3:
-    do_flame(30, 20, CRGB::Blue, 6, random8());
+    colorCode = CRGB::Blue;
     break;
   case 4:
-    do_flame(30, 20, CRGB::Green, 6, random8());
+    colorCode = CRGB::Green;
+    break;
+  case 5:
+    colorCode = CRGB::Yellow;
+    break;
+  case 6:
+    colorCode = CRGB::HotPink;
+    break;
+  case 7:
+    colorCode = CRGB::LightGoldenrodYellow;
+    break;
+  case 8:
+    colorCode = CRGB::DeepPink;
     break;
   }
+  do_flame(10, 20, colorCode, random8(6, 11), random8(0, 2));
 }
