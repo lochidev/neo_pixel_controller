@@ -11,11 +11,11 @@
 
 CRGB leds[NUM_LEDS];
 
-static void do_random(const size_t rounds, const size_t del)
+static void doRandom(const size_t rounds, const size_t del)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
-    for (size_t j = 0; j < 59; j++)
+    for (size_t j = 0; j < NUM_LEDS; j++)
     {
       leds[j].setRGB(random8(), random8(), random8());
     }
@@ -23,8 +23,8 @@ static void do_random(const size_t rounds, const size_t del)
     delay(del);
   }
 }
-static void do_flame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                     const int pulse, const uint8_t forwardDir = 1)
+static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
+                    const int pulse, const uint forwardDir = 1)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -75,13 +75,12 @@ void setup()
 
 void loop()
 {
-  uint8_t rand = random8(1, 9);
-  Serial.println(rand);
+  uint8_t rand = random8(1, 12);
   CRGB::HTMLColorCode colorCode;
   switch (rand)
   {
   case 1:
-    do_random(30, 100);
+    doRandom(30, 100);
     return;
   case 2:
     colorCode = CRGB::Red;
@@ -104,6 +103,15 @@ void loop()
   case 8:
     colorCode = CRGB::DeepPink;
     break;
+  case 9:
+    colorCode = CRGB::Amethyst;
+    break;
+  case 10:
+    colorCode = CRGB::Gold;
+    break;
+  case 11:
+    colorCode = CRGB::DarkRed;
+    break;
   }
-  do_flame(10, 20, colorCode, random8(6, 11), random8(0, 2));
+  doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2));
 }
