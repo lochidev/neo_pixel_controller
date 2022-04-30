@@ -24,7 +24,7 @@ static void doRandom(const size_t rounds, const size_t del)
   }
 }
 static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                    const int pulse, const uint forwardDir = 1)
+                    const int pulse, uint forwardDir = 1, const uint swapDir = 0)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -60,6 +60,7 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
         delay(del);
       }
     }
+    forwardDir = swapDir ? !forwardDir : forwardDir;
   }
 }
 void setup()
@@ -113,5 +114,5 @@ void loop()
     colorCode = CRGB::DarkRed;
     break;
   }
-  doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2));
+  doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2), !!random8(0, 2));
 }
