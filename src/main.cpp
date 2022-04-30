@@ -104,7 +104,7 @@ void setup()
 
 void loop()
 {
-  uint8_t rand = random8(1, 12);
+  uint8_t rand = random8(1, 14);
   CRGB::HTMLColorCode colorCode;
   switch (rand)
   {
@@ -141,8 +141,14 @@ void loop()
   case 11:
     colorCode = CRGB::DarkRed;
     break;
+  case 12:
+    colorCode = CRGB::Chocolate;
+    break;
+  case 13:
+    colorCode = CRGB::Purple;
+    break;
   }
-  if (rand & 0b1)
+  if (random8(0, 2))
   {
     doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2), !!random8(0, 2));
   }
