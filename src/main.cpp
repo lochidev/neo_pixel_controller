@@ -24,7 +24,7 @@ static void doRandom(const size_t rounds, const size_t del)
   }
 }
 static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                    const int pulse, uint forwardDir = 1, const uint swapDir = 0)
+                    const int pulse = 6, uint forwardDir = 1, const uint swapDir = 0)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -61,6 +61,34 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
       }
     }
     forwardDir = swapDir ? !forwardDir : forwardDir;
+  }
+}
+static void split(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
+                  const int pulse = 10, const int pulseOffset = 1) // pulseOffset -> always the same atm
+{
+  for (size_t i = 0; i < rounds - 1; i++)
+  {
+    const int splitP = NUM_LEDS / 2;
+    for (int j = 0; j < (splitP + 1 + pulse); j++)
+    {
+      const int backwardOffset = splitP - j;
+      const int forwardOffset = splitP + j;
+      if (backwardOffset >= 0)
+      {
+        leds[backwardOffset].setColorCode(color);
+      }
+      if (forwardOffset < NUM_LEDS)
+      {
+        leds[forwardOffset].setColorCode(color);
+      }
+      if (j > pulseOffset)
+      {
+        leds[backwardOffset + pulse].fadeLightBy(150);
+        leds[forwardOffset - pulse].fadeLightBy(150);
+      }
+      FastLED.show();
+      delay(del);
+    }
   }
 }
 void setup()
@@ -114,5 +142,12 @@ void loop()
     colorCode = CRGB::DarkRed;
     break;
   }
-  doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2), !!random8(0, 2));
+  if (rand & 0b1)
+  {
+    doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2), !!random8(0, 2));
+  }
+  else
+  {
+    split(10, 20, colorCode, random8(6, 11));
+  }
 }
