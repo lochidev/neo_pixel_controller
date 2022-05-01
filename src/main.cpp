@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "FastLED.h"
+#include <algorithm>
 
 #define NUM_LEDS 55
 #define CHIPSET WS2812B
@@ -104,9 +105,27 @@ void setup()
 
 void loop()
 {
-  uint8_t rand = random8(1, 14);
+  long rand = random(LONG_MAX);
   CRGB::HTMLColorCode colorCode;
-  switch (rand)
+  uint8_t cRand = rand & 0x11;
+  if (cRand > 22)
+  {
+    cRand -= cRand - 22;
+  }
+  // Serial.println("Start");
+  // Serial.print("cRand ");
+  // Serial.println(cRand);
+  // Serial.print("funcRand ");
+  // rand = rand >> 8;
+  // Serial.println((rand & 0b1));
+  // Serial.print("bitRands ");
+  // Serial.print(!!(rand & 0x10));
+  // Serial.println(!!(rand & 0x100));
+  // Serial.print("clamped ");
+  // Serial.println(min(max((rand & 0b1111), (long)6), (long)11));
+  // Serial.println("End");
+  // delay(1000);
+  switch (cRand)
   {
   case 1:
     doRandom(30, 100);
@@ -147,13 +166,43 @@ void loop()
   case 13:
     colorCode = CRGB::Purple;
     break;
+  case 14:
+    colorCode = CRGB::Crimson;
+    break;
+  case 15:
+    colorCode = CRGB::DarkOrange;
+    break;
+  case 16:
+    colorCode = CRGB::FireBrick;
+    break;
+  case 17:
+    colorCode = CRGB::Silver;
+    break;
+  case 18:
+    colorCode = CRGB::SpringGreen;
+    break;
+  case 19:
+    colorCode = CRGB::BlanchedAlmond;
+    break;
+  case 20:
+    colorCode = CRGB::Ivory;
+    break;
+  case 21:
+    colorCode = CRGB::DarkSeaGreen;
+    break;
+  case 22:
+    colorCode = CRGB::Wheat;
+    break;
   }
-  if (random8(0, 2))
+  rand = rand >> 8;
+  uint8_t i = random8(1, 3);
+  if (rand & 0b1)
   {
-    doFlame(10, 20, colorCode, random8(6, 11), !!random8(0, 2), !!random8(0, 2));
+
+    doFlame(10 * i, 20 / i, colorCode, min(max((rand & 0b1111), (long)6), (long)11), !!(rand & 0x10), !!(rand & 0x100));
   }
   else
   {
-    split(10, 20, colorCode, random8(6, 11));
+    split(10 * i, 20 / i, colorCode, min(max((rand & 0b1111), (long)6), (long)11));
   }
 }
