@@ -24,7 +24,8 @@ static void doRandom(const size_t rounds, const size_t del)
   }
 }
 static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                    const int pulse = 6, uint forwardDir = 1, const uint swapDir = 0)
+                    const int pulse = 6, uint forwardDir = 1, const uint swapDir = 0,
+                    const uint8_t fade = 90)
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -38,7 +39,7 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
         }
         if (j > (pulse - 1))
         {
-          leds[j - pulse].fadeLightBy(150);
+          leds[j - pulse].fadeLightBy(fade);
         }
         FastLED.show();
         delay(del);
@@ -54,7 +55,7 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
         }
         if (j < (NUM_LEDS - (pulse - 1)))
         {
-          leds[j + pulse].fadeLightBy(150);
+          leds[j + pulse].fadeLightBy(fade);
         }
         FastLED.show();
         delay(del);
@@ -64,7 +65,7 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
   }
 }
 static void split(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
-                  const int pulse = 10, const int pulseOffset = 1) // pulseOffset -> always the same atm
+                  const int pulse = 10, const int pulseOffset = 1, const uint8_t fade = 90) // pulseOffset -> always the same atm
 {
   for (size_t i = 0; i < rounds - 1; i++)
   {
@@ -83,12 +84,110 @@ static void split(const size_t rounds, const size_t del, CRGB::HTMLColorCode col
       }
       if (j > pulseOffset)
       {
-        leds[backwardOffset + pulse].fadeLightBy(150);
-        leds[forwardOffset - pulse].fadeLightBy(150);
+        leds[backwardOffset + pulse].fadeLightBy(fade);
+        leds[forwardOffset - pulse].fadeLightBy(fade);
       }
       FastLED.show();
       delay(del);
     }
+  }
+}
+static void splash(const size_t rounds, const size_t del, CRGB::HTMLColorCode color1,
+                   CRGB::HTMLColorCode color2, const uint spread = 10, const uint mix = 1)
+{
+  for (size_t i = 0; i < rounds - 1; i++)
+  {
+    uint splitP = NUM_LEDS / 2;
+    for (int j = 0; j < splitP + 1; j++)
+    {
+      leds[j].setColorCode(color1);
+      leds[NUM_LEDS - j].setColorCode(color2);
+      FastLED.show();
+      delay(del);
+    }
+    for (int i = 0; i < spread + 1; i++)
+    {
+      if (mix)
+      {
+        leds[splitP - i].setColorCode(color1 | color2);
+        leds[splitP + i].setColorCode(color1 | color2);
+        FastLED.show();
+        delay(del);
+      }
+    }
+    CRGB::HTMLColorCode temp;
+    temp = color1;
+    color1 = color2;
+    color2 = temp;
+  }
+}
+static CRGB::HTMLColorCode chooseColor(uint8_t cRand)
+{
+  switch (cRand)
+  {
+  case 1:
+    return CRGB::Fuchsia;
+  case 2:
+    return CRGB::Red;
+  case 3:
+    return CRGB::Blue;
+  case 4:
+    return CRGB::Green;
+  case 5:
+    return CRGB::Yellow;
+  case 6:
+    return CRGB::HotPink;
+
+  case 7:
+    return CRGB::LightGoldenrodYellow;
+
+  case 8:
+    return CRGB::DeepPink;
+
+  case 9:
+    return CRGB::Amethyst;
+
+  case 10:
+    return CRGB::Gold;
+
+  case 11:
+    return CRGB::DarkRed;
+
+  case 12:
+    return CRGB::Chocolate;
+
+  case 13:
+    return CRGB::Purple;
+
+  case 14:
+    return CRGB::Crimson;
+
+  case 15:
+    return CRGB::DarkOrange;
+
+  case 16:
+    return CRGB::FireBrick;
+
+  case 17:
+    return CRGB::Silver;
+
+  case 18:
+    return CRGB::SpringGreen;
+
+  case 19:
+    return CRGB::BlanchedAlmond;
+
+  case 20:
+    return CRGB::Ivory;
+
+  case 21:
+    return CRGB::DarkSeaGreen;
+
+  case 22:
+    return CRGB::Wheat;
+
+  default:
+    return CRGB::Fuchsia;
   }
 }
 void setup()
@@ -98,14 +197,13 @@ void setup()
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.clear();
   FastLED.show();
-  pinMode(DATA_PIN, OUTPUT);
   Serial.begin(115200);
 }
 
 void loop()
 {
-  long rand = random(LONG_MAX);
-  CRGB::HTMLColorCode colorCode;
+  int rand = random(LONG_MAX);
+
   // Serial.println("Start");
   uint8_t cRand = rand & 0xFF;
   // Serial.print("cRand 1 ");
@@ -120,94 +218,35 @@ void loop()
   // Serial.println(rand);
   // Serial.print("funcRand ");
   // rand = rand >> 8;
-  // Serial.println((rand & 0b1));
+  // Serial.println(rand & 0b11);
   // Serial.print("bitRands ");
-  // Serial.print(!!(rand & 0xF0));
-  // Serial.println(!!(rand & 0xF00));
+  // Serial.print(!!(rand & 0x20));
+  // Serial.println(!!(rand & 0x10));
   // Serial.print("clamped ");
-  // Serial.println(min(max((rand & 0b1111), (long)6), (long)11));
+  // Serial.println(min(max((((rand & 0xF00) >> 8) * 15), 120), 200));
   // Serial.println("End");
   // delay(1000);
-  switch (cRand)
-  {
-  case 1:
-    doRandom(30, 100);
-    return;
-  case 2:
-    colorCode = CRGB::Red;
-    break;
-  case 3:
-    colorCode = CRGB::Blue;
-    break;
-  case 4:
-    colorCode = CRGB::Green;
-    break;
-  case 5:
-    colorCode = CRGB::Yellow;
-    break;
-  case 6:
-    colorCode = CRGB::HotPink;
-    break;
-  case 7:
-    colorCode = CRGB::LightGoldenrodYellow;
-    break;
-  case 8:
-    colorCode = CRGB::DeepPink;
-    break;
-  case 9:
-    colorCode = CRGB::Amethyst;
-    break;
-  case 10:
-    colorCode = CRGB::Gold;
-    break;
-  case 11:
-    colorCode = CRGB::DarkRed;
-    break;
-  case 12:
-    colorCode = CRGB::Chocolate;
-    break;
-  case 13:
-    colorCode = CRGB::Purple;
-    break;
-  case 14:
-    colorCode = CRGB::Crimson;
-    break;
-  case 15:
-    colorCode = CRGB::DarkOrange;
-    break;
-  case 16:
-    colorCode = CRGB::FireBrick;
-    break;
-  case 17:
-    colorCode = CRGB::Silver;
-    break;
-  case 18:
-    colorCode = CRGB::SpringGreen;
-    break;
-  case 19:
-    colorCode = CRGB::BlanchedAlmond;
-    break;
-  case 20:
-    colorCode = CRGB::Ivory;
-    break;
-  case 21:
-    colorCode = CRGB::DarkSeaGreen;
-    break;
-  case 22:
-    colorCode = CRGB::Wheat;
-    break;
-  default:
-    return;
-  }
+  CRGB::HTMLColorCode colorCode = chooseColor(cRand);
   rand = rand >> 8;
   uint8_t i = random8(1, 3);
-  if (rand & 0b1)
+  uint8_t fRand = rand & 0b11;
+  if (fRand == 0)
   {
 
-    doFlame(10 * i, 20 / i, colorCode, min(max((rand & 0b1111), (long)6), (long)11), !!(rand & 0xF0), !!(rand & 0xF00));
+    doFlame(10 * i, 20 / i, colorCode, min(max((rand & 0b1111), 6), 11),
+            !!(rand & 0x10), !!(rand & 0x20), min(max((((rand & 0xF00) >> 8) * 15), 90), 200));
   }
-  else
+  else if (fRand == 1)
   {
-    split(10 * i, 20 / i, colorCode, min(max((rand & 0b1111), (long)6), (long)11));
+    split(10 * i, 20 / i, colorCode, min(max((rand & 0b1111), 6), 11),
+          1, min(max((((rand & 0xF00) >> 8) * 15), 90), 200));
+  }
+  else if (fRand == 2)
+  {
+    splash(10 * i, 20 / i, colorCode, chooseColor((rand >> 8) & 0xFF), 15);
+  }
+  else if (fRand == 3)
+  {
+    doRandom(30, 100);
   }
 }
