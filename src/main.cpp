@@ -10,10 +10,26 @@
 #define BRIGHTNESS 200
 
 CRGB leds[NUM_LEDS];
-
+static int mixColors(CRGB::HTMLColorCode color1, CRGB::HTMLColorCode color2, const uint rand)
+{
+  int color;
+  if (rand)
+  {
+    color = color1 - color2;
+  }
+  else
+  {
+    color = color1 + color2;
+  }
+  if (color == 0)
+  {
+    return CRGB::Gold;
+  }
+  return color;
+}
 static void doRandom(const size_t rounds, const size_t del)
 {
-  for (size_t i = 0; i < rounds - 1; i++)
+  for (size_t i = 0; i < rounds; i++)
   {
     for (size_t j = 0; j < NUM_LEDS; j++)
     {
@@ -27,7 +43,7 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
                     const int pulse = 6, uint forwardDir = 1, const uint swapDir = 0,
                     const uint8_t fade = 90)
 {
-  for (size_t i = 0; i < rounds - 1; i++)
+  for (size_t i = 0; i < rounds; i++)
   {
     if (forwardDir)
     {
@@ -67,7 +83,7 @@ static void doFlame(const size_t rounds, const size_t del, CRGB::HTMLColorCode c
 static void split(const size_t rounds, const size_t del, CRGB::HTMLColorCode color,
                   const int pulse = 10, const int pulseOffset = 1, const uint8_t fade = 90) // pulseOffset -> always the same atm
 {
-  for (size_t i = 0; i < rounds - 1; i++)
+  for (size_t i = 0; i < rounds; i++)
   {
     const int splitP = NUM_LEDS / 2;
     for (int j = 0; j < (splitP + 1 + pulse); j++)
@@ -93,9 +109,10 @@ static void split(const size_t rounds, const size_t del, CRGB::HTMLColorCode col
   }
 }
 static void splash(const size_t rounds, const size_t del, CRGB::HTMLColorCode color1,
-                   CRGB::HTMLColorCode color2, const uint spread = 10, const uint mix = 1)
+                   CRGB::HTMLColorCode color2, const uint rand, const uint spread = 10, const uint mix = 1,
+                   const uint multiplier = 2)
 {
-  for (size_t i = 0; i < rounds - 1; i++)
+  for (size_t i = 0; i < rounds; i++)
   {
     uint splitP = NUM_LEDS / 2;
     for (int j = 0; j < splitP + 1; j++)
@@ -105,14 +122,15 @@ static void splash(const size_t rounds, const size_t del, CRGB::HTMLColorCode co
       FastLED.show();
       delay(del);
     }
+    delay(del);
     for (int i = 0; i < spread + 1; i++)
     {
       if (mix)
       {
-        leds[splitP - i].setColorCode(color1 | color2);
-        leds[splitP + i].setColorCode(color1 | color2);
+        leds[splitP - i].setColorCode(mixColors(color1, color2, rand));
+        leds[splitP + i].setColorCode(mixColors(color1, color2, rand));
         FastLED.show();
-        delay(del);
+        delay(del * multiplier);
       }
     }
     CRGB::HTMLColorCode temp;
@@ -121,6 +139,7 @@ static void splash(const size_t rounds, const size_t del, CRGB::HTMLColorCode co
     color2 = temp;
   }
 }
+
 static CRGB::HTMLColorCode chooseColor(uint8_t cRand)
 {
   switch (cRand)
@@ -187,7 +206,7 @@ static CRGB::HTMLColorCode chooseColor(uint8_t cRand)
     return CRGB::Wheat;
 
   default:
-    return CRGB::Fuchsia;
+    return CRGB::Lavender;
   }
 }
 void setup()
@@ -243,7 +262,7 @@ void loop()
   }
   else if (fRand == 2)
   {
-    splash(10 * i, 20 / i, colorCode, chooseColor((rand >> 8) & 0xFF), 15);
+    splash(10 * i, 20 / i, colorCode, chooseColor((rand >> 8) & 0xFF), !!(rand & 0x100), 15);
   }
   else if (fRand == 3)
   {
