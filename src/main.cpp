@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "FastLED.h"
 
-#define NUM_LEDS 55
+#define NUM_LEDS 57
 #define CHIPSET WS2812B
 #define COLOR_ORDER GRB
 #define DATA_PIN 27
